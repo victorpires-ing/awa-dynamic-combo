@@ -188,6 +188,7 @@ export default function App() {
       comboId: activeCombo.id,
       nome: activeCombo.nome,
       ticketNome: activeCombo.ingressosPorData[0]?.nome,
+      lote: activeCombo.ingressosPorData[0]?.subtitulo ?? null,
       datas: selectedDateObjects,
       subtotal,
       totalTickets,

@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatarPreco } from '../data/mockData.js'
+import { Ticket } from 'lucide-react'
 
 const imgTicketIcon = 'http://localhost:3845/assets/e7f3c537741866b598fee4f4c727398f7ab7f8c3.svg'
 
@@ -14,12 +15,9 @@ function TicketBadge({ qty }) {
     <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-[6px] overflow-hidden bg-[#f4f4f4]">
       <div className="flex items-center gap-0.5 px-1">
         <span className="text-sm font-bold text-[#181818] leading-none">{qty}</span>
-        <img
-          src={imgTicketIcon}
-          alt=""
-          className="w-[18px] h-[18px]"
-          onError={(e) => { e.currentTarget.outerHTML = '<span class="text-[10px]">🎟</span>' }}
-        />
+        <span className='rotate-90'>
+          <Ticket size={18} color='#909090' />
+        </span>
       </div>
     </div>
   )
@@ -33,10 +31,13 @@ function ComboSummaryRow({ item, onRemove }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-start gap-2">
-        <TicketBadge qty={item.totalTickets || item.datas.length} />
+        <TicketBadge qty={1} />
         <div className="flex flex-1 gap-2 items-start min-w-0">
           <div className="flex-1 flex flex-col gap-1 min-w-0">
             <p className="text-sm font-bold text-[#181818] truncate">{item.nome}</p>
+            {item.lote && (
+              <p className="text-sm text-[#464646] leading-5 truncate">{item.lote}</p>
+            )}
             {/* Ticket name + date on the same line */}
             {item.ticketNome && (
               <p className="text-sm text-[#464646] leading-5 truncate">

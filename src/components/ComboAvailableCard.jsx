@@ -18,17 +18,17 @@ export default function ComboAvailableCard({ combo, onPersonalizar }) {
       className="bg-white border border-neutral-200 rounded-xl p-4 flex items-start justify-between gap-3"
     >
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        {lote && (
+          <p className="text-sm text-neutral-500 leading-5">{lote}</p>
+        )}
         <p className="text-sm font-bold text-neutral-900 leading-5">{combo.nome}</p>
         {firstDate && (
           <p className="text-sm text-brand leading-5">
             {fmtDataShort(firstDate)} + {sessionCount} sessões
           </p>
         )}
-        {lote && (
-          <p className="text-sm text-neutral-500 leading-5">{lote}</p>
-        )}
         {combo.descricao && (
-          <p className="text-sm text-neutral-500 leading-5">{combo.descricao}</p>
+          <p className="text-sm text-neutral-500 leading-5 pt-2">{combo.descricao}</p>
         )}
       </div>
       <button

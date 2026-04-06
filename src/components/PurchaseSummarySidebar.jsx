@@ -1,5 +1,6 @@
 import { XIcon, TagIcon, InfoCircleIcon } from './Icons.jsx'
 import { formatarPreco } from '../data/mockData.js'
+import { Ticket } from 'lucide-react' 
 
 const imgTicketIcon = 'http://localhost:3845/assets/e7f3c537741866b598fee4f4c727398f7ab7f8c3.svg'
 
@@ -8,12 +9,9 @@ function TicketBadge({ qty }) {
     <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-[6px] bg-[#f4f4f4]">
       <div className="flex items-center gap-0.5 px-1">
         <span className="text-xs font-bold text-[#181818] leading-none">{qty}</span>
-        <img
-          src={imgTicketIcon}
-          alt=""
-          className="w-[14px] h-[14px]"
-          onError={(e) => { e.currentTarget.outerHTML = '<span class="text-[9px]">🎟</span>' }}
-        />
+        <span className='rotate-90'>
+          <Ticket size={18} color='#909090' />
+        </span>
       </div>
     </div>
   )
@@ -33,10 +31,13 @@ function ComboRow({ item, onRemove }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-start gap-2">
-        <TicketBadge qty={item.totalTickets ?? item.datas.length} />
+        <TicketBadge qty={1} />
         <div className="flex flex-1 gap-2 items-start min-w-0">
           <div className="flex-1 flex flex-col gap-0.5 min-w-0">
             <p className="text-sm font-bold text-[#181818] truncate">{item.nome}</p>
+            {item.lote && (
+              <p className="text-sm text-[#464646] leading-5 truncate">{item.lote}</p>
+            )}
             {/* Ticket name + date on the same line */}
             {item.ticketNome && (
               <p className="text-sm text-[#464646] leading-5 truncate">
@@ -182,20 +183,10 @@ export default function PurchaseSummarySidebar({
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <div className="px-4 py-4 border-t border-neutral-200 mt-auto">
-        {resumo && (
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-sm text-neutral-400 line-through">
-              de {formatarPreco(resumo.precoOriginal)}
-            </span>
-            <span className="text-[11px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-md">
-              {resumo.desconto}% OFF
-            </span>
-          </div>
-        )}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1 min-w-0">
             <span className="text-base font-semibold text-[#181818]">
-              Por {formatarPreco(hasItems ? total : (resumo?.precoFinal ?? 0))}
+              {formatarPreco(hasItems ? total : (resumo?.precoFinal ?? 0))}
             </span>
             <span className="text-sm text-[#464646] flex-shrink-0">+ taxas</span>
             <InfoCircleIcon size={14} className="text-[#909090] flex-shrink-0" />
@@ -212,9 +203,6 @@ export default function PurchaseSummarySidebar({
             Continuar
           </button>
         </div>
-        <p className="text-xs text-neutral-400 mt-1">
-          {hasItems ? `${totalItems} ${totalItems === 1 ? 'item' : 'itens'}` : '4 itens'}
-        </p>
       </div>
     </div>
   )

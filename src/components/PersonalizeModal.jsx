@@ -53,13 +53,10 @@ return (
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
           >
             <div className="flex-shrink-0 px-5 pt-5 pb-4 border-b border-neutral-100">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between items-center gap-3">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <p className="text-base font-bold text-neutral-900 leading-tight truncate">
                     {combo.nome}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    Selecione entre {minTotal} e {maxTotal} itens
                   </p>
                 </div>
                 <button
@@ -69,6 +66,14 @@ return (
                   <XIcon size={16} />
                 </button>
               </div>
+            </div>
+            <div className="px-5 py-2 bg-gray-100 flex justify-between">
+                <p className="text-sm text-neutral-500">
+                  Selecione entre {minTotal} e {maxTotal} itens
+                </p>
+                <p className="text-sm font-semibold text-neutral-500">
+                  {totalSelected} {totalSelected === 1 ? 'item selecionado' : 'itens selecionados'}
+                </p>
             </div>
 
             <div className="flex-1 overflow-y-scroll min-h-0 custom-scroll">
@@ -81,11 +86,7 @@ return (
             </div>
 
             <div className="flex-shrink-0 border-t border-neutral-100">
-              <div className="px-5 pt-3 pb-1">
-                <p className="text-sm text-neutral-500">
-                  {totalSelected} {totalSelected === 1 ? 'item selecionado' : 'itens selecionados'}
-                </p>
-              </div>
+              
               <div className="flex gap-3 px-5 pb-5 pt-2">
                 <button
                   onClick={onClose}

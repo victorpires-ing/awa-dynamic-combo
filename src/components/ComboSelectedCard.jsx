@@ -28,7 +28,7 @@ export default function ComboSelectedCard({ selected, combo, onEditar }) {
           </p>
         )}
         {combo?.descricao && (
-          <p className="text-sm text-neutral-500 leading-5">{combo.descricao}</p>
+          <p className="text-sm text-neutral-500 leading-5 pt-2">{combo.descricao}</p>
         )}
       </div>
       <button
