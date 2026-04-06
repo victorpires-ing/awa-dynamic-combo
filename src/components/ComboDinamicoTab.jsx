@@ -39,7 +39,7 @@ export default function ComboDinamicoTab({ combos, selectedCombos, onPersonaliza
         </div>
       </div>
 
-      {hasItems && <div className="h-h2 lg:h-0" />}
+      {hasItems && <div className="h-h2 lg:h-2" />}
     </div>
   )
 }

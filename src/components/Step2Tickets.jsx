@@ -87,9 +87,9 @@ export default function Step2Tickets({ combo, selectedDates, ticketQuantities, o
                         {ticket.subtitulo && (
                           <span className="text-xs text-neutral-500">{ticket.subtitulo}</span>
                         )}
-                        <span className="text-sm font-semibold text-neutral-900 mt-1">
+                        {/*<span className="text-sm font-semibold text-neutral-900 mt-1">
                           {formatarPreco(ticket.preco)}
-                        </span>
+                        </span>*/}
                       </div>
                       <QuantityControl
                         value={qty}
