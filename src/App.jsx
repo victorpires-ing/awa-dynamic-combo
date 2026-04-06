@@ -109,7 +109,9 @@ export default function App() {
     const initQtys = {}
     allDateIds.forEach((dateId) => {
       initQtys[dateId] = {}
-      combo.ingressosPorData.forEach((t) => { initQtys[dateId][t.id] = 0 })
+      combo.ingressosPorData.forEach((t) => {
+        initQtys[dateId][t.id] = t.obrigatorio ? 1 : 0
+      })
     })
     setEditingComboId(null)
     setActiveCombo(combo)
@@ -144,9 +146,14 @@ export default function App() {
     setTicketQuantities((prev) => {
       const datePrev = prev[dateId] || {}
       const current = datePrev[ticketId] || 0
-      const totalDate = Object.values(datePrev).reduce((a, b) => a + b, 0)
-      if (delta > 0 && totalDate >= activeCombo.maxIngressosPorData) return prev
-      if (delta < 0 && current <= 0) return prev
+      const ticket = activeCombo.ingressosPorData.find((t) => t.id === ticketId)
+      const minQty = ticket?.obrigatorio ? 1 : 0
+      const maxTotal = activeCombo.maxTotal ?? activeCombo.maxIngressosPorData ?? Infinity
+      const comboTotal = Object.values(prev).reduce(
+        (t, dq) => t + Object.values(dq).reduce((a, b) => a + b, 0), 0
+      )
+      if (delta > 0 && comboTotal >= maxTotal) return prev
+      if (delta < 0 && current <= minQty) return prev
       return { ...prev, [dateId]: { ...datePrev, [ticketId]: current + delta } }
     })
   }, [activeCombo])

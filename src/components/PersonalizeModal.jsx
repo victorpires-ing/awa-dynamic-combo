@@ -14,7 +14,8 @@ export default function PersonalizeModal({
 }) {
   if (!combo) return null
 
-  const minPorData = combo.minIngressosPorData ?? 0
+  const minTotal = combo.minTotal ?? combo.minIngressosPorData ?? 1
+  const maxTotal = combo.maxTotal ?? combo.maxIngressosPorData ?? Infinity
 
   const totalSelected = useMemo(() =>
     Object.values(ticketQuantities).reduce(
@@ -24,15 +25,7 @@ export default function PersonalizeModal({
     [ticketQuantities]
   )
 
-  const canConfirm = useMemo(() => {
-    if (selectedDates.length === 0) return false
-    return selectedDates.every((dateId) => {
-      const qty = Object.values(ticketQuantities[dateId] || {}).reduce((a, b) => a + b, 0)
-      return qty >= minPorData
-    })
-  }, [selectedDates, ticketQuantities, minPorData])
-
-  const maxTotal = combo.maxIngressosPorData * selectedDates.length
+  const canConfirm = selectedDates.length > 0 && totalSelected >= minTotal
 
 return (
   <AnimatePresence>
@@ -66,7 +59,7 @@ return (
                     {combo.nome}
                   </p>
                   <p className="text-sm text-neutral-500">
-                    Selecione entre {minPorData} e {maxTotal} itens
+                    Selecione entre {minTotal} e {maxTotal} itens
                   </p>
                 </div>
                 <button

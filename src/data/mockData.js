@@ -19,11 +19,11 @@ export const combosDisponiveis = [
     minDatas: 2,
     maxDatas: 3,
     ingressosPorData: [
-      { id: 'i1', nome: 'Vip - open bar', subtitulo: 'Consumação inclusa', preco: 269.90 },
-      { id: 'i2', nome: 'Vip - open bar', subtitulo: 'Consumação inclusa', preco: 269.90 },
+      { id: 'i1', nome: 'Vip - open bar', subtitulo: 'Consumação inclusa', preco: 269.90, obrigatorio: true },
+      { id: 'i2', nome: 'Pista premium', subtitulo: null, preco: 189.90, obrigatorio: false },
     ],
-    minIngressosPorData: 1,
-    maxIngressosPorData: 2,
+    minTotal: 3,
+    maxTotal: 8,
   },
   {
     id: 'pass3f',
@@ -38,11 +38,11 @@ export const combosDisponiveis = [
     minDatas: 2,
     maxDatas: 3,
     ingressosPorData: [
-      { id: 'i1', nome: 'Vip - open bar', subtitulo: 'Consumação inclusa', preco: 249.90 },
-      { id: 'i2', nome: 'Pista premium', subtitulo: null, preco: 149.90 },
+      { id: 'i1', nome: 'Vip - open bar', subtitulo: 'Consumação inclusa', preco: 249.90, obrigatorio: true },
+      { id: 'i2', nome: 'Pista premium', subtitulo: null, preco: 149.90, obrigatorio: false },
     ],
-    minIngressosPorData: 1,
-    maxIngressosPorData: 2,
+    minTotal: 3,
+    maxTotal: 8,
   },
 ]
 
