@@ -87,26 +87,47 @@ export function BrazilFlagIcon({ size = 20 }) {
   )
 }
 
+export function ChevronRightIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className}>
+      <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ArrowLeftIcon({ size = 20, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+      <path d="M12.5 16L6 10L12.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function MoreVerticalIcon({ size = 20, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className}>
+      <circle cx="10" cy="5" r="1.25" fill="currentColor" />
+      <circle cx="10" cy="10" r="1.25" fill="currentColor" />
+      <circle cx="10" cy="15" r="1.25" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function ShareIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className}>
+      <path d="M11 1L15 5L11 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 5H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function IngresseLogo() {
   return (
-    <div className="flex items-center gap-1.5" style={{ height: 32 }}>
       <img
-        src="http://localhost:3845/assets/44c5aa2cbd7902413fe4c96d8d3af23a77ba64dc.svg"
-        alt=""
-        style={{ height: 32, width: 'auto', display: 'block' }}
-        onError={(e) => { e.currentTarget.style.display = 'none' }}
-      />
-      <img
-        src="http://localhost:3845/assets/8182aa5df93681c22a67edf833d064025fb30c8d.svg"
+        src="/logo-ingresse-colorful.svg"
         alt="Ingresse"
         style={{ height: 32, width: 'auto', display: 'block' }}
-        onError={(e) => {
-          const el = document.createElement('span')
-          el.style.cssText = 'font-size:18px;font-weight:700;color:#171717;letter-spacing:-0.5px;line-height:32px;font-family:Inter,sans-serif'
-          el.textContent = 'INGRESSE'
-          e.currentTarget.replaceWith(el)
-        }}
       />
-    </div>
   )
 }

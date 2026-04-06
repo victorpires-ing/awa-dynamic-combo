@@ -7,7 +7,7 @@ export default function SuccessPage({ evento, personalizedCombos, comboQtys, tot
 
   return (
     <motion.div
-      className="mobile-frame flex flex-col min-h-dvh bg-white"
+      className="mobile-frame flex flex-col min-h-dvh bg-white lg:items-center lg:justify-center"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}

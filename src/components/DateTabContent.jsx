@@ -84,9 +84,9 @@ export default function DateTabContent({ data, qtys, onQtyChange }) {
   const [activeHorario, setActiveHorario] = useState(data.horarios[0])
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-4">
+    <div className="flex flex-col gap-4 px-4 pb-4 pt-4">
       <div>
-        <p className="text-sm font-medium text-neutral-600 mb-3">Horários disponíveis</p>
+        <p className="text-sm font-semibold text-neutral-600 mb-3">Horários disponíveis</p>
         <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {data.horarios.map((h) => (
             <button
@@ -114,8 +114,6 @@ export default function DateTabContent({ data, qtys, onQtyChange }) {
           />
         ))}
       </div>
-
-      <div className="h-52" />
     </div>
   )
 }

@@ -1,13 +1,16 @@
 import { useState, useCallback, useMemo } from 'react'
 import Header from './components/Header.jsx'
+import DesktopPageHeader from './components/DesktopPageHeader.jsx'
 import EventCard from './components/EventCard.jsx'
 import TabNav from './components/TabNav.jsx'
 import ComboDinamicoTab from './components/ComboDinamicoTab.jsx'
 import DateTabContent from './components/DateTabContent.jsx'
 import PersonalizeModal from './components/PersonalizeModal.jsx'
 import PurchaseSummaryPanel from './components/PurchaseSummaryPanel.jsx'
+import PurchaseSummarySidebar from './components/PurchaseSummarySidebar.jsx'
 import SuccessPage from './components/SuccessPage.jsx'
 import Toast from './components/Toast.jsx'
+import { TagIcon } from './components/Icons.jsx'
 import { evento, combosDisponiveis, datasAvulsas, resumoCompra } from './data/mockData.js'
 
 const TABS = [
@@ -30,15 +33,14 @@ export default function App() {
   // ── Modal ────────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false)
   const [activeCombo, setActiveCombo] = useState(null)
-  const [step, setStep] = useState(1)
   const [selectedDates, setSelectedDates] = useState([])
   const [ticketQuantities, setTicketQuantities] = useState({})
 
-  // ── Combos adicionados (vão direto ao summary) ───────────────────
+  // ── Combos adicionados ───────────────────────────────────────────
   const [personalizedCombos, setPersonalizedCombos] = useState([])
+  const [editingComboId, setEditingComboId] = useState(null)
 
-  // ── Ingressos avulsos — estado controlado aqui ───────────────────
-  // { tabId: { ticketId: qty } }
+  // ── Ingressos avulsos ────────────────────────────────────────────
   const [dateTabQtys, setDateTabQtys] = useState({})
 
   // ── Summary panel ─────────────────────────────────────────────────
@@ -75,7 +77,6 @@ export default function App() {
   const grandTotal = combosTotal + dateTotal
   const hasAnyItem = grandTotal > 0
 
-  // Items para o summary panel — ingressos avulsos
   const summaryDateItems = useMemo(() => {
     const items = []
     datasAvulsas.forEach((data) => {
@@ -104,44 +105,40 @@ export default function App() {
   // ── Handlers: modal ──────────────────────────────────────────────
 
   const handlePersonalizar = useCallback((combo) => {
-    const mandatory = combo.datas.filter((d) => d.obrigatoria).map((d) => d.id)
+    const allDateIds = combo.datas.map((d) => d.id)
+    const initQtys = {}
+    allDateIds.forEach((dateId) => {
+      initQtys[dateId] = {}
+      combo.ingressosPorData.forEach((t) => { initQtys[dateId][t.id] = 0 })
+    })
+    setEditingComboId(null)
     setActiveCombo(combo)
-    setSelectedDates(mandatory)
-    setTicketQuantities({})
-    setStep(1)
+    setSelectedDates(allDateIds)
+    setTicketQuantities(initQtys)
     setModalOpen(true)
   }, [])
+
+  const handleEditar = useCallback((personalizedId) => {
+    const existing = personalizedCombos.find((c) => c.id === personalizedId)
+    if (!existing) return
+    const combo = combosDisponiveis.find((c) => c.id === existing.comboId)
+    if (!combo) return
+    setEditingComboId(personalizedId)
+    setActiveCombo(combo)
+    setSelectedDates(existing.datas.map((d) => d.id))
+    setTicketQuantities(existing.savedQtys ?? {})
+    setModalOpen(true)
+  }, [personalizedCombos])
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false)
     setTimeout(() => {
+      setEditingComboId(null)
       setActiveCombo(null)
       setSelectedDates([])
       setTicketQuantities({})
-      setStep(1)
     }, 350)
   }, [])
-
-  const handleToggleDate = useCallback((dateId) => {
-    if (!activeCombo) return
-    const isObrigatoria = activeCombo.datas.find((d) => d.id === dateId)?.obrigatoria
-    if (isObrigatoria) return
-    setSelectedDates((prev) => {
-      if (prev.includes(dateId)) return prev.filter((id) => id !== dateId)
-      if (prev.length >= activeCombo.maxDatas) return prev
-      return [...prev, dateId]
-    })
-  }, [activeCombo])
-
-  const handleContinue = useCallback(() => {
-    const initQtys = {}
-    selectedDates.forEach((dateId) => {
-      initQtys[dateId] = {}
-      activeCombo.ingressosPorData.forEach((t) => { initQtys[dateId][t.id] = 0 })
-    })
-    setTicketQuantities(initQtys)
-    setStep(2)
-  }, [selectedDates, activeCombo])
 
   const handleQtyChange = useCallback((dateId, ticketId, delta) => {
     setTicketQuantities((prev) => {
@@ -158,7 +155,6 @@ export default function App() {
     const id = `combo-${Date.now()}`
     const selectedDateObjects = activeCombo.datas.filter((d) => selectedDates.includes(d.id))
 
-    // Calcula subtotal e monta sub-items
     const subItems = []
     let subtotal = 0
     let totalTickets = 0
@@ -168,7 +164,7 @@ export default function App() {
       activeCombo.ingressosPorData.forEach((ticket) => {
         const qty = dateQtys[ticket.id] || 0
         if (qty > 0) {
-          subItems.push({ qty, nome: ticket.nome })
+          subItems.push({ qty, nome: ticket.nome, data: date.data })
           subtotal += ticket.preco * qty
           totalTickets += qty
         }
@@ -181,7 +177,7 @@ export default function App() {
     }
 
     const newCombo = {
-      id,
+      id: editingComboId ?? id,
       comboId: activeCombo.id,
       nome: activeCombo.nome,
       ticketNome: activeCombo.ingressosPorData[0]?.nome,
@@ -189,18 +185,24 @@ export default function App() {
       subtotal,
       totalTickets,
       subItems,
+      savedQtys: ticketQuantities,
     }
 
-    setPersonalizedCombos((prev) => [...prev, newCombo])
-    setModalOpen(false)
-    setSummaryExpanded(true) // abre o summary automaticamente
-    showToast('Combo adicionado com sucesso!')
+    if (editingComboId) {
+      setPersonalizedCombos((prev) => prev.map((c) => c.id === editingComboId ? newCombo : c))
+      showToast('Combo atualizado!')
+    } else {
+      setPersonalizedCombos((prev) => [...prev, newCombo])
+      setSummaryExpanded(true)
+      showToast('Combo adicionado com sucesso!')
+    }
 
+    setModalOpen(false)
     setTimeout(() => {
+      setEditingComboId(null)
       setActiveCombo(null)
       setSelectedDates([])
       setTicketQuantities({})
-      setStep(1)
     }, 350)
   }, [activeCombo, selectedDates, ticketQuantities])
 
@@ -241,8 +243,6 @@ export default function App() {
     setSummaryExpanded(false)
   }, [])
 
-  // ── Reset ─────────────────────────────────────────────────────────
-
   function handleReset() {
     setPage('purchase')
     setPersonalizedCombos([])
@@ -253,7 +253,7 @@ export default function App() {
 
   const activeDataTab = datasAvulsas.find((d) => d.id === activeTab)
 
-  // ── Render ───────────────────────────────────────────────────────
+  // ── Success page ─────────────────────────────────────────────────
 
   if (page === 'success') {
     return (
@@ -267,76 +267,97 @@ export default function App() {
     )
   }
 
+  // ── Purchase page ─────────────────────────────────────────────────
+
   return (
     <div className="mobile-frame">
-      {/* Header — scrolla com a página */}
-      <div className="bg-white">
-        <Header />
-        <div className="px-4 pt-1 pb-3">
-          <button
-            className="flex items-center gap-1.5 border border-neutral-300 rounded-md px-3 py-1.5 bg-white active:bg-neutral-50 transition-colors"
-            style={{ boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.10), inset 0 -2px 0 0 rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05)' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-neutral-700">
-              <path d="M9 1.5H3.5a1 1 0 0 0-1 1v5L8.5 14l5-5L9 1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="5.5" cy="5.5" r="0.75" fill="currentColor" />
-            </svg>
-            <span className="text-sm font-semibold text-neutral-700">Usar código/cupom</span>
-          </button>
+      {/* ── Header ──────────────────────────────────────────────── */}
+      <Header evento={evento} />
+
+      {/* ── Desktop sub-header (hidden on mobile) ───────────────── */}
+      <div className="hidden lg:block">
+        <DesktopPageHeader />
+      </div>
+
+      {/* ── Main content area ───────────────────────────────────── */}
+      <div className="lg:max-w-[1320px] lg:mx-auto lg:px-8 lg:py-6">
+        <div className="lg:flex lg:gap-6 lg:items-start">
+
+          {/* ── Left column: tabs + content ─────────────────────── */}
+          <div className="lg:flex-1 lg:min-w-0 lg:bg-white lg:rounded-xl lg:border lg:border-neutral-200 lg:overflow-hidden" style={{ boxShadow: 'var(--tw-shadow, 0 2px 8px rgba(0,0,0,0.06))' }}>
+
+            {/* Tab navigation */}
+            <div className="py-3 lg:px-0 lg:pt-4 lg:pb-0">
+              <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+            </div>
+
+            {/* Tab content */}
+            <div>
+              {activeTab === 'combo' ? (
+                <ComboDinamicoTab
+                  combos={combosDisponiveis}
+                  selectedCombos={personalizedCombos}
+                  onPersonalizar={handlePersonalizar}
+                  onEditar={handleEditar}
+                  hasItems={hasAnyItem}
+                />
+              ) : activeDataTab ? (
+                <DateTabContent
+                  key={activeDataTab.id}
+                  data={activeDataTab}
+                  qtys={dateTabQtys[activeDataTab.id] || {}}
+                  onQtyChange={(ticketId, delta) => handleDateQtyChange(activeDataTab.id, ticketId, delta)}
+                />
+              ) : null}
+            </div>
+          </div>
+
+          {/* ── Right column: desktop sidebar (hidden on mobile) ─── */}
+          <div className="hidden lg:block lg:w-[360px] xl:w-[400px] flex-shrink-0">
+            <PurchaseSummarySidebar
+              total={grandTotal}
+              comboItems={personalizedCombos}
+              dateItems={summaryDateItems}
+              onRemoveCombo={handleRemoveCombo}
+              onRemoveDateItem={handleRemoveDateItem}
+              onClearAll={handleClearAll}
+              onContinue={() => setPage('success')}
+              resumo={resumoCompra}
+            />
+          </div>
+
         </div>
       </div>
 
-      {/* Conteúdo scrollável */}
-      <div className="flex flex-col gap-3">
-        <EventCard evento={evento} />
-        <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {activeTab === 'combo' ? (
-          <ComboDinamicoTab
-            combos={combosDisponiveis}
-            onPersonalizar={handlePersonalizar}
-            hasItems={hasAnyItem}
+      {/* ── Mobile floating summary panel (hidden on desktop) ───── */}
+      {hasAnyItem && (
+        <div className="lg:hidden">
+          <PurchaseSummaryPanel
+            expanded={summaryExpanded}
+            onToggle={() => setSummaryExpanded((v) => !v)}
+            total={grandTotal}
+            comboItems={personalizedCombos}
+            dateItems={summaryDateItems}
+            onRemoveCombo={handleRemoveCombo}
+            onRemoveDateItem={handleRemoveDateItem}
+            onClearAll={handleClearAll}
+            onContinue={() => setPage('success')}
           />
-        ) : activeDataTab ? (
-          <DateTabContent
-            key={activeDataTab.id}
-            data={activeDataTab}
-            qtys={dateTabQtys[activeDataTab.id] || {}}
-            onQtyChange={(ticketId, delta) => handleDateQtyChange(activeDataTab.id, ticketId, delta)}
-          />
-        ) : null}
-      </div>
+        </div>
+      )}
 
-      {/* Modal de personalização */}
+      {/* ── Personalize modal ────────────────────────────────────── */}
       <PersonalizeModal
         open={modalOpen}
         combo={activeCombo}
-        step={step}
         selectedDates={selectedDates}
         ticketQuantities={ticketQuantities}
         onClose={handleModalClose}
-        onToggleDate={handleToggleDate}
-        onContinue={handleContinue}
         onQtyChange={handleQtyChange}
         onAddCombo={handleAddCombo}
       />
 
-      {/* Summary panel — aparece ao adicionar qualquer item */}
-      {hasAnyItem && (
-        <PurchaseSummaryPanel
-          expanded={summaryExpanded}
-          onToggle={() => setSummaryExpanded((v) => !v)}
-          total={grandTotal}
-          comboItems={personalizedCombos}
-          dateItems={summaryDateItems}
-          onRemoveCombo={handleRemoveCombo}
-          onRemoveDateItem={handleRemoveDateItem}
-          onClearAll={handleClearAll}
-          onContinue={() => setPage('success')}
-        />
-      )}
-
-      {/* Toast */}
+      {/* ── Toast ────────────────────────────────────────────────── */}
       <Toast show={toast.show} message={toast.message} />
     </div>
   )

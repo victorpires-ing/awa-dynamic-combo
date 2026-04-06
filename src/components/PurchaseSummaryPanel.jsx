@@ -3,6 +3,12 @@ import { formatarPreco } from '../data/mockData.js'
 
 const imgTicketIcon = 'http://localhost:3845/assets/e7f3c537741866b598fee4f4c727398f7ab7f8c3.svg'
 
+function fmtData(str) {
+  if (!str) return ''
+  const [d, m, y] = str.split('/')
+  return `${d}/${m}/${y?.slice(-2) || ''}`
+}
+
 function TicketBadge({ qty }) {
   return (
     <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-[6px] overflow-hidden bg-[#f4f4f4]">
@@ -12,9 +18,7 @@ function TicketBadge({ qty }) {
           src={imgTicketIcon}
           alt=""
           className="w-[18px] h-[18px]"
-          onError={(e) => {
-            e.currentTarget.outerHTML = '<span class="text-[10px]">🎟</span>'
-          }}
+          onError={(e) => { e.currentTarget.outerHTML = '<span class="text-[10px]">🎟</span>' }}
         />
       </div>
     </div>
@@ -33,10 +37,16 @@ function ComboSummaryRow({ item, onRemove }) {
         <div className="flex flex-1 gap-2 items-start min-w-0">
           <div className="flex-1 flex flex-col gap-1 min-w-0">
             <p className="text-sm font-bold text-[#181818] truncate">{item.nome}</p>
+            {/* Ticket name + date on the same line */}
             {item.ticketNome && (
-              <p className="text-sm text-[#181818] leading-5">{item.ticketNome}</p>
+              <p className="text-sm text-[#464646] leading-5 truncate">
+                {item.ticketNome}
+                {datesStr && <span className="text-[#909090]"> · {datesStr}</span>}
+              </p>
             )}
-            <p className="text-sm text-[#909090] tracking-[0.28px]">{datesStr}</p>
+            {!item.ticketNome && datesStr && (
+              <p className="text-sm text-[#909090] tracking-[0.28px]">{datesStr}</p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
             <p className="text-sm font-semibold text-[#181818] text-right">{formatarPreco(item.subtotal)}</p>
@@ -58,7 +68,10 @@ function ComboSummaryRow({ item, onRemove }) {
               <div className="w-5 h-5 rounded-full bg-[#f4f4f4] flex items-center justify-center flex-shrink-0 px-1">
                 <span className="text-[12px] font-medium text-[#181818] text-center leading-none">{sub.qty}</span>
               </div>
-              <span className="text-sm text-[#464646] truncate">{sub.nome}</span>
+              <span className="text-sm text-[#464646] truncate">
+                {sub.data && <span className="text-[#909090]">{fmtData(sub.data)} · </span>}
+                {sub.nome}
+              </span>
             </div>
           ))}
         </div>
@@ -74,8 +87,10 @@ function DateSummaryRow({ item, onRemove }) {
       <div className="flex flex-1 gap-2 items-start min-w-0">
         <div className="flex-1 flex flex-col gap-1 min-w-0">
           <p className="text-sm font-bold text-[#181818] truncate">{item.grupoNome}</p>
-          <p className="text-sm text-[#181818] leading-5">{item.ticketNome}</p>
-          <p className="text-sm text-[#909090] tracking-[0.28px]">{item.dataStr}</p>
+          <p className="text-sm text-[#464646] leading-5 truncate">
+            {item.ticketNome}
+            {item.dataStr && <span className="text-[#909090]"> · {item.dataStr}</span>}
+          </p>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <p className="text-sm font-semibold text-[#181818] text-right">{formatarPreco(item.preco)}</p>
@@ -89,12 +104,6 @@ function DateSummaryRow({ item, onRemove }) {
       </div>
     </div>
   )
-}
-
-function fmtData(str) {
-  if (!str) return ''
-  const [d, m, y] = str.split('/')
-  return `${d}/${m}/${y?.slice(-2) || ''}`
 }
 
 export default function PurchaseSummaryPanel({
@@ -111,102 +120,117 @@ export default function PurchaseSummaryPanel({
   const totalItems = comboItems.length + dateItems.length
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-[16px] flex flex-col"
-      style={{
-        maxWidth: 430,
-        margin: '0 auto',
-        border: '1px solid #d5d5d5',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.10)',
-      }}
-    >
-      {/* Header — toggle */}
-      <button
-        onClick={onToggle}
-        className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b"
-        style={{ background: 'rgba(249,250,251,0.5)', borderColor: '#f3f4f6' }}
-      >
-        <span className="text-sm font-medium text-[#101828]">Resumo da compra</span>
-        <motion.div animate={{ rotate: expanded ? 0 : 180 }} transition={{ duration: 0.2 }}>
-          {/* chevron up */}
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M4.5 11.25L9 6.75L13.5 11.25" stroke="#667085" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </motion.div>
-      </button>
-
-      {/* Items — scrollable, só quando expandido */}
-      <AnimatePresence initial={false}>
+    <>
+      {/* ── Backdrop — visible only when expanded ─────────────────── */}
+      <AnimatePresence>
         {expanded && (
           <motion.div
-            key="items"
-            initial={{ height: 0 }}
-            animate={{ height: 'auto' }}
-            exit={{ height: 0 }}
-            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-            className="overflow-hidden"
-          >
-            <div className="overflow-y-auto" style={{ maxHeight: '55dvh' }}>
-              {/* Section header */}
-              <div className="flex items-center gap-2 px-4 pt-4 pb-3">
-                <span className="text-[12px] font-bold text-[#464646] tracking-[0.24px] whitespace-nowrap">
-                  Ingressos
-                </span>
-                <div className="flex-1 border-t-2 border-dashed border-[#d5d5d5]" />
-                <button
-                  onClick={onClearAll}
-                  className="text-[12px] text-[#909090] underline tracking-[0.24px] whitespace-nowrap"
-                >
-                  Limpar tudo
-                </button>
-              </div>
-
-              {/* Items list */}
-              <div className="px-4 pb-4 flex flex-col gap-4">
-                {comboItems.map((item) => (
-                  <ComboSummaryRow
-                    key={item.id}
-                    item={item}
-                    onRemove={() => onRemoveCombo(item.id)}
-                  />
-                ))}
-                {dateItems.map((item) => (
-                  <DateSummaryRow
-                    key={item.id}
-                    item={item}
-                    onRemove={() => onRemoveDateItem(item.tabId, item.ticketId)}
-                  />
-                ))}
-                {totalItems === 0 && (
-                  <p className="text-sm text-[#909090] text-center py-4">Nenhum ingresso selecionado</p>
-                )}
-              </div>
-            </div>
-          </motion.div>
+            key="backdrop"
+            className="fixed inset-0 z-[39] bg-black/50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onToggle}
+          />
         )}
       </AnimatePresence>
 
-      {/* Footer — sempre visível */}
+      {/* ── Panel — full width, always at bottom ──────────────────── */}
       <div
-        className="flex-shrink-0 flex items-center justify-between px-4 py-4"
-        style={{ borderTop: '1px solid #e6e6e6' }}
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-[16px] flex flex-col"
+        style={{
+          border: '1px solid #d5d5d5',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.12)',
+        }}
       >
-        <div className="flex items-center gap-1">
-          <span className="text-base font-medium text-[#181818]">{formatarPreco(total)}</span>
-          <span className="text-sm text-[#464646] tracking-[0.28px]">+ taxas</span>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="ml-0.5 flex-shrink-0">
-            <circle cx="9" cy="9" r="8" stroke="#909090" strokeWidth="1.3"/>
-            <path d="M9 8v5" stroke="#909090" strokeWidth="1.3" strokeLinecap="round"/>
-            <circle cx="9" cy="5.5" r="0.75" fill="#909090"/>
-          </svg>
-        </div>
+        {/* Header — toggle */}
         <button
-          onClick={onContinue}
-          className="bg-brand text-white text-sm font-medium rounded-xl px-5 py-3 active:opacity-80 transition-opacity whitespace-nowrap"
+          onClick={onToggle}
+          className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b"
+          style={{ background: 'rgba(249,250,251,0.5)', borderColor: '#f3f4f6' }}
         >
-          Continuar
+          <span className="text-sm font-medium text-[#101828]">Resumo da compra</span>
+          <motion.div animate={{ rotate: expanded ? 0 : 180 }} transition={{ duration: 0.2 }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4.5 11.25L9 6.75L13.5 11.25" stroke="#667085" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.div>
         </button>
+
+        {/* Items — scrollable, only when expanded */}
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              key="items"
+              initial={{ height: 0 }}
+              animate={{ height: 'auto' }}
+              exit={{ height: 0 }}
+              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              className="overflow-hidden"
+            >
+              <div className="overflow-y-auto" style={{ maxHeight: '55dvh' }}>
+                {/* Section header */}
+                <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+                  <span className="text-[12px] font-bold text-[#464646] tracking-[0.24px] whitespace-nowrap">
+                    Ingressos
+                  </span>
+                  <div className="flex-1 border-t-2 border-dashed border-[#d5d5d5]" />
+                  <button
+                    onClick={onClearAll}
+                    className="text-[12px] text-[#909090] underline tracking-[0.24px] whitespace-nowrap"
+                  >
+                    Limpar tudo
+                  </button>
+                </div>
+
+                {/* Items list */}
+                <div className="px-4 pb-4 flex flex-col gap-4">
+                  {comboItems.map((item) => (
+                    <ComboSummaryRow
+                      key={item.id}
+                      item={item}
+                      onRemove={() => onRemoveCombo(item.id)}
+                    />
+                  ))}
+                  {dateItems.map((item) => (
+                    <DateSummaryRow
+                      key={item.id}
+                      item={item}
+                      onRemove={() => onRemoveDateItem(item.tabId, item.ticketId)}
+                    />
+                  ))}
+                  {totalItems === 0 && (
+                    <p className="text-sm text-[#909090] text-center py-4">Nenhum ingresso selecionado</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Footer — always visible */}
+        <div
+          className="flex-shrink-0 flex items-center justify-between px-4 py-4"
+          style={{ borderTop: '1px solid #e6e6e6' }}
+        >
+          <div className="flex items-center gap-1">
+            <span className="text-base font-medium text-[#181818]">{formatarPreco(total)}</span>
+            <span className="text-sm text-[#464646] tracking-[0.28px]">+ taxas</span>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="ml-0.5 flex-shrink-0">
+              <circle cx="9" cy="9" r="8" stroke="#909090" strokeWidth="1.3"/>
+              <path d="M9 8v5" stroke="#909090" strokeWidth="1.3" strokeLinecap="round"/>
+              <circle cx="9" cy="5.5" r="0.75" fill="#909090"/>
+            </svg>
+          </div>
+          <button
+            onClick={onContinue}
+            className="bg-brand text-white text-sm font-medium rounded-xl px-5 py-3 active:opacity-80 transition-opacity whitespace-nowrap"
+          >
+            Continuar
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
