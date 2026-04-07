@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatarPreco } from '../data/mockData.js'
 import { Ticket } from 'lucide-react'
+import { InfoCircleIcon } from './Icons.jsx'
+
 
 const imgTicketIcon = 'http://localhost:3845/assets/e7f3c537741866b598fee4f4c727398f7ab7f8c3.svg'
 
@@ -218,11 +220,7 @@ export default function PurchaseSummaryPanel({
           <div className="flex items-center gap-1">
             <span className="text-base font-medium text-[#181818]">{formatarPreco(total)}</span>
             <span className="text-sm text-[#464646] tracking-[0.28px]">+ taxas</span>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="ml-0.5 flex-shrink-0">
-              <circle cx="9" cy="9" r="8" stroke="#909090" strokeWidth="1.3"/>
-              <path d="M9 8v5" stroke="#909090" strokeWidth="1.3" strokeLinecap="round"/>
-              <circle cx="9" cy="5.5" r="0.75" fill="#909090"/>
-            </svg>
+            <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
           </div>
           <button
             onClick={onContinue}

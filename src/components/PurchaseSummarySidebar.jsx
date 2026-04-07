@@ -1,8 +1,6 @@
-import { XIcon, TagIcon, InfoCircleIcon } from './Icons.jsx'
+import { InfoCircleIcon } from './Icons.jsx'
 import { formatarPreco } from '../data/mockData.js'
-import { Ticket } from 'lucide-react' 
-
-const imgTicketIcon = 'http://localhost:3845/assets/e7f3c537741866b598fee4f4c727398f7ab7f8c3.svg'
+import { Ticket } from 'lucide-react'
 
 function TicketBadge({ qty }) {
   return (
@@ -24,9 +22,10 @@ function fmtData(str) {
 }
 
 function ComboRow({ item, onRemove }) {
+  const d0 = item.datas[0]
   const datesStr = item.datas.length > 1
-    ? `${fmtData(item.datas[0].data)} +${item.datas.length - 1} sessão`
-    : fmtData(item.datas[0]?.data ?? '')
+    ? `${fmtData(d0?.data)}${d0?.hora ? `, ${d0.hora}` : ''} +${item.datas.length - 1} sessão`
+    : `${fmtData(d0?.data ?? '')}${d0?.hora ? `, ${d0.hora}` : ''}`
 
   return (
     <div className="flex flex-col gap-2">
@@ -131,7 +130,6 @@ export default function PurchaseSummarySidebar({
   resumo,
 }) {
   const hasItems = comboItems.length + dateItems.length > 0
-  const totalItems = comboItems.length + dateItems.length
 
   return (
     <div
@@ -189,7 +187,7 @@ export default function PurchaseSummarySidebar({
               {formatarPreco(hasItems ? total : (resumo?.precoFinal ?? 0))}
             </span>
             <span className="text-sm text-[#464646] flex-shrink-0">+ taxas</span>
-            <InfoCircleIcon size={14} className="text-[#909090] flex-shrink-0" />
+            <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
           </div>
           <button
             onClick={onContinue}

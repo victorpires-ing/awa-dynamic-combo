@@ -8,6 +8,7 @@ function fmtDataShort(str) {
 
 export default function ComboAvailableCard({ combo, onPersonalizar }) {
   const firstDate = combo.datas[0]?.data
+  const firstHora = combo.datas[0]?.hora
   const sessionCount = combo.datas.length
   const lote = combo.ingressosPorData[0]?.subtitulo
 
@@ -17,18 +18,19 @@ export default function ComboAvailableCard({ combo, onPersonalizar }) {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white border border-neutral-200 rounded-xl p-4 flex items-start justify-between gap-3"
     >
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+      <div className="flex flex-col gap-2 min-w-0 flex-1">
+        
+        <p className="text-sm font-bold text-neutral-900 leading-5">{combo.nome}</p>
+        {firstDate && (
+          <p className="text-sm font-medium text-gray-600 leading-5">
+            <span className="bg-gray-100 px-2 py-0.5 rounded-full">{fmtDataShort(firstDate)}{firstHora ? `, ${firstHora}` : ''}</span> <span className="bg-gray-100 px-2 py-0.5 rounded-full">+{sessionCount} sessões</span>
+          </p>
+        )}
         {lote && (
           <p className="text-sm text-neutral-500 leading-5">{lote}</p>
         )}
-        <p className="text-sm font-bold text-neutral-900 leading-5">{combo.nome}</p>
-        {firstDate && (
-          <p className="text-sm text-brand leading-5">
-            {fmtDataShort(firstDate)} + {sessionCount} sessões
-          </p>
-        )}
         {combo.descricao && (
-          <p className="text-sm text-neutral-500 leading-5 pt-2">{combo.descricao}</p>
+          <p className="text-sm text-neutral-500 leading-5">{combo.descricao}</p>
         )}
       </div>
       <button
