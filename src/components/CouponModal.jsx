@@ -28,7 +28,7 @@ export default function CouponModal({ open, onClose, onApply }) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -37,10 +37,9 @@ export default function CouponModal({ open, onClose, onApply }) {
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
-          {/* Dialog — centered on all sizes */}
+          {/* Dialog */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-              bg-white rounded-2xl w-[calc(100%-2rem)] max-w-[400px] flex flex-col overflow-hidden"
+            className="relative w-full max-w-[400px] bg-white rounded-2xl flex flex-col overflow-hidden"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
