@@ -20,7 +20,14 @@ export default function ComboAvailableCard({ combo, onPersonalizar }) {
     >
       <div className="flex flex-col gap-2 min-w-0 flex-1">
         
-        <p className="text-sm font-bold text-neutral-900 leading-5">{combo.nome}</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-sm font-bold text-neutral-900 leading-5">{combo.nome}</p>
+          {combo.desconto && (
+            <span className="text-xs font-semibold bg-green-100 text-success px-2 py-0.5 rounded-full whitespace-nowrap">
+              {combo.desconto}% OFF
+            </span>
+          )}
+        </div>
         {firstDate && (
           <p className="text-sm font-medium text-gray-600 leading-5">
             <span className="bg-gray-100 px-2 py-0.5 rounded-full">{fmtDataShort(firstDate)}{firstHora ? `, ${firstHora}` : ''}</span> <span className="bg-gray-100 px-2 py-0.5 rounded-full">+{sessionCount} sessões</span>

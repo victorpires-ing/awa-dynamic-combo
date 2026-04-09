@@ -1,16 +1,16 @@
 import { useState, useCallback, useMemo } from 'react'
 import Header from './components/Header.jsx'
 import DesktopPageHeader from './components/DesktopPageHeader.jsx'
-import EventCard from './components/EventCard.jsx'
 import TabNav from './components/TabNav.jsx'
 import ComboDinamicoTab from './components/ComboDinamicoTab.jsx'
 import DateTabContent from './components/DateTabContent.jsx'
 import PersonalizeModal from './components/PersonalizeModal.jsx'
 import PurchaseSummaryPanel from './components/PurchaseSummaryPanel.jsx'
 import PurchaseSummarySidebar from './components/PurchaseSummarySidebar.jsx'
+import CouponSection from './components/CouponSection.jsx'
+import CouponModal from './components/CouponModal.jsx'
 import SuccessPage from './components/SuccessPage.jsx'
 import Toast from './components/Toast.jsx'
-import { TagIcon } from './components/Icons.jsx'
 import { evento, combosDisponiveis, datasAvulsas, resumoCompra } from './data/mockData.js'
 
 const TABS = [
@@ -46,6 +46,19 @@ export default function App() {
   // ── Summary panel ─────────────────────────────────────────────────
   const [summaryExpanded, setSummaryExpanded] = useState(false)
 
+  // ── Cupom ──────────────────────────────────────────────────────────
+  const [coupon, setCoupon] = useState(null)
+  const [couponModalOpen, setCouponModalOpen] = useState(false)
+
+  function handleApplyCoupon(code) {
+    if (code.toLowerCase() === '10off') {
+      setCoupon({ code, percent: 10, message: 'Válido apenas para o primeiro ingresso de maior valor da compra.' })
+      setCouponModalOpen(false)
+      return true
+    }
+    return false
+  }
+
   // ── Toast ─────────────────────────────────────────────────────────
   const [toast, setToast] = useState({ show: false, message: '' })
 
@@ -76,6 +89,17 @@ export default function App() {
 
   const grandTotal = combosTotal + dateTotal
   const hasAnyItem = grandTotal > 0
+
+  const comboDiscount = personalizedCombos.reduce((sum, c) => {
+    const comboDef = combosDisponiveis.find((cd) => cd.id === c.comboId)
+    return sum + (comboDef?.desconto ? Math.round(c.subtotal * (comboDef.desconto / 100) * 100) / 100 : 0)
+  }, 0)
+  const couponDiscount = coupon ? Math.round(grandTotal * (coupon.percent / 100) * 100) / 100 : 0
+  const discountAmount = comboDiscount + couponDiscount
+  const discountPercent = grandTotal > 0 && discountAmount > 0
+    ? Math.round((discountAmount / grandTotal) * 100)
+    : 0
+  const finalTotal = grandTotal - discountAmount
 
   const summaryDateItems = useMemo(() => {
     const items = []
@@ -294,6 +318,15 @@ export default function App() {
           {/* ── Left column: tabs + content ─────────────────────── */}
           <div className="lg:flex-1 lg:min-w-0 lg:bg-white lg:rounded-xl lg:border lg:border-neutral-200 lg:overflow-hidden" style={{ boxShadow: 'var(--tw-shadow, 0 2px 8px rgba(0,0,0,0.06))' }}>
 
+            {/* Coupon section — mobile only, above tabs */}
+            <div className="lg:hidden px-4 pt-3 pb-2">
+              <CouponSection
+                coupon={coupon}
+                onOpenModal={() => setCouponModalOpen(true)}
+                onRemove={() => setCoupon(null)}
+              />
+            </div>
+
             {/* Tab navigation */}
             <div className="py-3 lg:px-0 lg:pt-4 lg:pb-0">
               <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
@@ -331,6 +364,12 @@ export default function App() {
               onClearAll={handleClearAll}
               onContinue={() => setPage('success')}
               resumo={resumoCompra}
+              coupon={coupon}
+              discountAmount={discountAmount}
+              discountPercent={discountPercent}
+              finalTotal={finalTotal}
+              onOpenCouponModal={() => setCouponModalOpen(true)}
+              onRemoveCoupon={() => setCoupon(null)}
             />
           </div>
 
@@ -350,9 +389,19 @@ export default function App() {
             onRemoveDateItem={handleRemoveDateItem}
             onClearAll={handleClearAll}
             onContinue={() => setPage('success')}
+            discountAmount={discountAmount}
+            discountPercent={discountPercent}
+            finalTotal={finalTotal}
           />
         </div>
       )}
+
+      {/* ── Coupon modal ─────────────────────────────────────────── */}
+      <CouponModal
+        open={couponModalOpen}
+        onClose={() => setCouponModalOpen(false)}
+        onApply={handleApplyCoupon}
+      />
 
       {/* ── Personalize modal ────────────────────────────────────── */}
       <PersonalizeModal

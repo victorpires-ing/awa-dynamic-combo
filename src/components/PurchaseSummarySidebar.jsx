@@ -1,6 +1,7 @@
 import { InfoCircleIcon } from './Icons.jsx'
 import { formatarPreco } from '../data/mockData.js'
 import { Ticket } from 'lucide-react'
+import CouponSection from './CouponSection.jsx'
 
 function TicketBadge({ qty }) {
   return (
@@ -127,21 +128,32 @@ export default function PurchaseSummarySidebar({
   onRemoveDateItem,
   onClearAll,
   onContinue,
-  resumo,
+  coupon,
+  discountAmount,
+  discountPercent,
+  finalTotal,
+  onOpenCouponModal,
+  onRemoveCoupon,
 }) {
   const hasItems = comboItems.length + dateItems.length > 0
 
   return (
+    <div className="flex flex-col gap-3 sticky top-6">
+      {/* ── Coupon section — outside white card, on page bg ─────── */}
+      <CouponSection
+        coupon={coupon}
+        onOpenModal={onOpenCouponModal}
+        onRemove={onRemoveCoupon}
+      />
+
     <div
-      className="bg-white rounded-xl border border-neutral-200 flex flex-col overflow-hidden sticky top-6"
+      className="bg-white rounded-xl border border-neutral-200 flex flex-col overflow-hidden"
       style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
     >
-      {/* ── Coupon section ─────────────────────────────────────── */}
+      {/* ── Summary title ──────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-neutral-100">
         <h3 className="text-sm font-semibold text-neutral-700">Resumo da compra</h3>
       </div>
-
-      {/* ── Summary title ──────────────────────────────────────── */}
 
 
       {/* ── Items area ─────────────────────────────────────────── */}
@@ -180,15 +192,31 @@ export default function PurchaseSummarySidebar({
       </div>
 
       {/* ── Footer ─────────────────────────────────────────────── */}
-      <div className="px-4 py-4 border-t border-neutral-200 mt-auto">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1 min-w-0">
-            <span className="text-base font-semibold text-[#181818]">
-              {formatarPreco(hasItems ? total : (resumo?.precoFinal ?? 0))}
-            </span>
-            <span className="text-sm text-[#464646] flex-shrink-0">+ taxas</span>
-            <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
+      <div className="px-4 pt-3 pb-4 border-t border-neutral-200 mt-auto flex flex-col gap-2">
+        {discountAmount > 0 && hasItems && (
+          <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+            <span className="text-sm text-[#464646]">Descontos</span>
+            <span className="text-sm font-semibold text-green-600">-{formatarPreco(discountAmount)}</span>
           </div>
+        )}
+        <div className={`flex items-center gap-3 ${hasItems ? 'justify-between' : 'justify-end'}`}>
+          {hasItems && (
+            <div className="flex flex-col gap-0.5 min-w-0">
+              {discountAmount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm line-through text-neutral-400">{formatarPreco(total)}</span>
+                  <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{discountPercent}% OFF</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="text-base font-semibold text-[#181818]">
+                  {formatarPreco(discountAmount > 0 ? finalTotal : total)}
+                </span>
+                <span className="text-sm text-[#464646] flex-shrink-0">+ taxas</span>
+                <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
+              </div>
+            </div>
+          )}
           <button
             onClick={onContinue}
             disabled={!hasItems}
@@ -202,6 +230,7 @@ export default function PurchaseSummarySidebar({
           </button>
         </div>
       </div>
+    </div>
     </div>
   )
 }

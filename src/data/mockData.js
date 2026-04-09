@@ -10,6 +10,7 @@ export const combosDisponiveis = [
     id: 'pass3m',
     nome: 'SPECIAL PASS 3 MASCULINO',
     descricao: 'Acesso VIP nos 3 dias do evento com open bar incluso',
+    desconto: 10,
     datas: [
       { id: 'd1', data: '26/12/2026', diaSemana: 'sáb', hora: '10h30', obrigatoria: true },
       { id: 'd2', data: '27/12/2026', diaSemana: 'dom', hora: '10h30', obrigatoria: false },
@@ -110,5 +111,6 @@ export const resumoCompra = {
 }
 
 export function formatarPreco(valor) {
+  if (valor == null || isNaN(valor)) return ''
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }

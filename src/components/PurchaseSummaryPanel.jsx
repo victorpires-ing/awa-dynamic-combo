@@ -119,6 +119,9 @@ export default function PurchaseSummaryPanel({
   onRemoveDateItem,
   onClearAll,
   onContinue,
+  discountAmount,
+  discountPercent,
+  finalTotal,
 }) {
   const totalItems = comboItems.length + dateItems.length
 
@@ -207,6 +210,12 @@ export default function PurchaseSummaryPanel({
                     <p className="text-sm text-[#909090] text-center py-4">Nenhum ingresso selecionado</p>
                   )}
                 </div>
+                {discountAmount > 0 && totalItems > 0 && (
+                  <div className="flex items-center justify-between px-4 py-3 border-t border-neutral-100">
+                    <span className="text-sm text-[#464646]">Descontos</span>
+                    <span className="text-sm font-semibold text-green-600">-{formatarPreco(discountAmount)}</span>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -217,10 +226,18 @@ export default function PurchaseSummaryPanel({
           className="flex-shrink-0 flex items-center justify-between px-4 py-4"
           style={{ borderTop: '1px solid #e6e6e6' }}
         >
-          <div className="flex items-center gap-1">
-            <span className="text-base font-medium text-[#181818]">{formatarPreco(total)}</span>
-            <span className="text-sm text-[#464646] tracking-[0.28px]">+ taxas</span>
-            <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            {discountAmount > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm line-through text-neutral-400">{formatarPreco(total)}</span>
+                <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{discountPercent}% OFF</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <span className="text-base font-medium text-[#181818]">{formatarPreco(discountAmount > 0 ? finalTotal : total)}</span>
+              <span className="text-sm text-[#464646] tracking-[0.28px]">+ taxas</span>
+              <InfoCircleIcon size={14} className="text-[#2A89EF] flex-shrink-0" />
+            </div>
           </div>
           <button
             onClick={onContinue}
